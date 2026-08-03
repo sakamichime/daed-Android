@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.4.0](https://github.com/sakamichime/daed-Android/compare/dae-lang-core-v0.3.0...dae-lang-core-v0.4.0) (2026-08-03)
+
+
+### Features
+
+* re-trigger release-please ([4febcf7](https://github.com/sakamichime/daed-Android/commit/4febcf7ebba807474e8215510669e0a756c31585))
+* trigger release ([e6618d5](https://github.com/sakamichime/daed-Android/commit/e6618d5cfb721dec3633278018e2f254c23daff9))
+
 ## [0.3.0](https://github.com/sakamichime/daed-Android/compare/dae-lang-core-v0.2.0...dae-lang-core-v0.3.0) (2026-08-03)
 
 

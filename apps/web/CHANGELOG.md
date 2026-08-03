@@ -1,5 +1,34 @@
 # Changelog
 
+## [1.30.0](https://github.com/sakamichime/daed-Android/compare/v1.29.0...v1.30.0) (2026-08-03)
+
+
+### Features
+
+* **dae-lsp:** add browser LSP support and fix completions ([32b5b49](https://github.com/sakamichime/daed-Android/commit/32b5b49abd58b8f16c72a2f2dd188bc7c2cf7877))
+* optimize user experience ([7013499](https://github.com/sakamichime/daed-Android/commit/701349900e004eafa8c3e4c4326059c63fb8057a))
+* **parser:** add parser for dae language with AST and symbol information ([12b5754](https://github.com/sakamichime/daed-Android/commit/12b5754b8f53b5dbac00b9aac0839f5d52113736))
+* re-trigger release-please ([4febcf7](https://github.com/sakamichime/daed-Android/commit/4febcf7ebba807474e8215510669e0a756c31585))
+* trigger release ([e6618d5](https://github.com/sakamichime/daed-Android/commit/e6618d5cfb721dec3633278018e2f254c23daff9))
+* **ui:** enhance layout and visual design system ([1bc9280](https://github.com/sakamichime/daed-Android/commit/1bc928076986884658551f5634a80b86d10c3a26))
+* update pnpm workspace and add turbo configuration ([4484dc4](https://github.com/sakamichime/daed-Android/commit/4484dc43be6f1d229053bcc7bd589c528707024f))
+* **web:** add bootstrap resolver config input ([#757](https://github.com/sakamichime/daed-Android/issues/757)) ([4d6a433](https://github.com/sakamichime/daed-Android/commit/4d6a43331f2f6e25961935b9e7ac09a7568bb2b4))
+* **web:** add group resource pickers and improve drag UX ([#736](https://github.com/sakamichime/daed-Android/issues/736)) ([cfb0ec5](https://github.com/sakamichime/daed-Android/commit/cfb0ec528cc8bc3bfeed1dd1a9353bf9fa62de03))
+* **web:** add regex-filtered group subscriptions ([#738](https://github.com/sakamichime/daed-Android/issues/738)) ([3b62c11](https://github.com/sakamichime/daed-Android/commit/3b62c111172a906edc9d79335527f8206819cb8c))
+* **web:** add runtime traffic overview and node latency displays ([#742](https://github.com/sakamichime/daed-Android/issues/742)) ([4a519fc](https://github.com/sakamichime/daed-Android/commit/4a519fcbaa7004e50e80a309c68d6811596468cf))
+
+
+### Bug Fixes
+
+* **dnd:** allow dragging subscription nodes into groups ([605ad48](https://github.com/sakamichime/daed-Android/commit/605ad4847232fdc882ccf1304e8c6417b7645b6b))
+* **dnd:** migrate to @hello-pangea/dnd and fix drag issues in modals ([76d4492](https://github.com/sakamichime/daed-Android/commit/76d4492793236d73a897657cafdcbf09b9d46c1f))
+* **pr-677:** address review feedback ([ebd7b7c](https://github.com/sakamichime/daed-Android/commit/ebd7b7c379e85e49feb986f7d1da99f1fa30d2d0))
+* remove rolldownOptions from build configuration ([632c33d](https://github.com/sakamichime/daed-Android/commit/632c33d620522c9d960321aa0ad6690f6b3fc2a2))
+* resolve CI failures from dependency upgrade breakages ([e46053f](https://github.com/sakamichime/daed-Android/commit/e46053f3f809cc632c9550720cbf41e9df423f90))
+* **ui:** fix scrolling issue of multi-select component ([#726](https://github.com/sakamichime/daed-Android/issues/726)) ([a8fe086](https://github.com/sakamichime/daed-Android/commit/a8fe08601dc1e5c4b34932a1bd95960c6c20c77d))
+* **web:** drop unused GroupAddNodes variable ([#741](https://github.com/sakamichime/daed-Android/issues/741)) ([02016e7](https://github.com/sakamichime/daed-Android/commit/02016e70505b8ca35ae717f641276f479bbd742e))
+* 节点行域名过长时删除按钮被挤出可视区域 ([55030d3](https://github.com/sakamichime/daed-Android/commit/55030d340da11a0e55cb8bb95caf314b42c23386))
+
 ## [1.29.0](https://github.com/sakamichime/daed-Android/compare/v1.28.0...v1.29.0) (2026-08-03)
 
 
