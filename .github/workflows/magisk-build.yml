@@ -1,0 +1,180 @@
+name: Build Magisk Module
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'android/magisk/**'
+      - '.github/workflows/magisk-build.yml'
+      - 'Makefile'
+      - 'install/friendly-filenames.json'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version tag (e.g. v1.0.0). Leave empty to auto-generate.'
+        required: false
+        default: ''
+      create_release:
+        description: 'Create a GitHub release with the zip attached'
+        required: false
+        default: 'true'
+        type: choice
+        options:
+          - 'true'
+          - 'false'
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          submodules: recursive
+
+      - uses: actions/setup-go@v6
+        with:
+          go-version: '1.24'
+          cache: false
+
+      - uses: pnpm/action-setup@v6.0.9
+
+      - uses: actions/setup-node@v6
+        with:
+          cache: pnpm
+          node-version: latest
+
+      - name: Install eBPF build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang-18 llvm-18
+
+      - name: Determine version
+        id: version
+        run: |
+          if [ -n "${{ github.event.inputs.version }}" ]; then
+            VERSION="${{ github.event.inputs.version }}"
+          else
+            VERSION="v$(date +%Y%m%d)-${GITHUB_SHA::7}"
+          fi
+          echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+
+      - name: Build web frontend
+        env:
+          NODE_OPTIONS: --max-old-space-size=4096
+        run: |
+          pnpm install --no-frozen-lockfile
+          pnpm build --filter daed
+
+      - name: Build eBPF objects (arm64)
+        working-directory: wing/dae-core
+        run: |
+          make ebpf GOARCH=arm64 CLANG=clang-18 STRIP=llvm-strip-18
+
+      - name: Generate schema resolver
+        working-directory: wing
+        run: |
+          unset GOOS GOARCH GOARM CC
+          go generate ./...
+
+      - name: Prepare web assets for embedding
+        working-directory: wing
+        run: |
+          rm -rf webrender/web
+          cp -r ../apps/web/dist webrender/web
+          find webrender/web -type f -size +4k ! -name "*.gz" ! -name "*.woff" ! -name "*.woff2" -exec sh -c \
+            'gzip -9 -k "{}"; if [ $(stat -c %s "{}") -lt $(stat -c %s "{}".gz) ]; then rm "{}".gz; else rm "{}"; fi' ';'
+
+      - name: Build Android arm64 binary
+        working-directory: wing
+        env:
+          GOOS: android
+          GOARCH: arm64
+          CGO_ENABLED: 0
+          GOFLAGS: -trimpath -modcacherw
+        run: |
+          go build -tags="embedallowed,trace" -o daed-android-arm64 \
+            -trimpath \
+            -ldflags "-s -w \
+              -X github.com/daeuniverse/dae-wing/db.AppVersion=$VERSION \
+              -X github.com/daeuniverse/dae-wing/db.AppName=daed \
+              -X 'github.com/daeuniverse/dae-wing/db.AppDescription=daed Android Magisk Module'" \
+            .
+
+      - name: Stage Magisk module
+        run: |
+          mkdir -p android/magisk/system/bin
+          cp wing/daed-android-arm64 android/magisk/system/bin/daed
+          chmod 755 android/magisk/system/bin/daed
+          # Inject the build version into module.prop
+          sed -i "s/^version=.*/version=$VERSION/" android/magisk/module.prop
+          echo "--- module.prop ---"
+          cat android/magisk/module.prop
+
+      - name: Package Magisk zip
+        run: |
+          cd android/magisk
+          zip -r ../../daed-magisk-$VERSION.zip . -x ".gitignore"
+          cd ../..
+          ls -lh daed-magisk-*.zip
+          echo "--- zip contents (top level) ---"
+          unzip -l daed-magisk-$VERSION.zip | head -20
+
+      - name: Generate checksums
+        run: |
+          sha256sum daed-magisk-$VERSION.zip > daed-magisk-$VERSION.zip.dgst
+          sha512sum daed-magisk-$VERSION.zip >> daed-magisk-$VERSION.zip.dgst
+          cat daed-magisk-$VERSION.zip.dgst
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: daed-magisk
+          path: daed-magisk-*.zip*
+
+      - name: Smoke test (verify zip structure)
+        run: |
+          # Ensure module.prop is at the zip root (Magisk requirement)
+          if unzip -l daed-magisk-$VERSION.zip | grep -qE '^\s+\S+\s+\S+\s+\S+\s+module\.prop$'; then
+            echo "OK: module.prop is at zip root"
+          else
+            echo "ERROR: module.prop not found at zip root" && exit 1
+          fi
+          # Ensure daed binary is present under system/bin/
+          if unzip -l daed-magisk-$VERSION.zip | grep -q 'system/bin/daed'; then
+            echo "OK: system/bin/daed present"
+          else
+            echo "ERROR: system/bin/daed missing" && exit 1
+          fi
+
+      - name: Create GitHub release
+        if: github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && github.ref == 'refs/heads/main')
+        env:
+          GH_TOKEN: ${{ github.token }}
+          CREATE_RELEASE: ${{ github.event.inputs.create_release || 'true' }}
+        run: |
+          if [ "$CREATE_RELEASE" != "true" ]; then
+            echo "Skipping release creation (create_release != true)"
+            exit 0
+          fi
+          if gh release view "$VERSION" >/dev/null 2>&1; then
+            echo "Release $VERSION already exists, uploading assets..."
+            gh release upload "$VERSION" daed-magisk-$VERSION.zip daed-magisk-$VERSION.zip.dgst --clobber
+          else
+            gh release create "$VERSION" \
+              daed-magisk-$VERSION.zip daed-magisk-$VERSION.zip.dgst \
+              --title "daed Magisk Module $VERSION" \
+              --notes "Android Magisk module for daed.
+
+          ## Install
+          1. Download \`daed-magisk-$VERSION.zip\`
+          2. Open Magisk app → Modules → Install from storage → select the zip
+          3. Reboot your device
+          4. Run \`daed-open\` in a shell (or use \`shortcut.json\`) to open the web panel at http://127.0.0.1:2023
+
+          See [android/magisk/README.md](https://github.com/${{ github.repository }}/blob/main/android/magisk/README.md) for details."
+          fi
