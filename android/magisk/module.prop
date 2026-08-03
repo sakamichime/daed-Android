@@ -1,0 +1,6 @@
+id=daed
+name=daed
+version=v0.0.0-magisk
+versionCode=1
+author=daeuniverse
+description=A modern web dashboard for dae (Android Magisk Module). Auto-start dae on boot and provide a quick shortcut to the web panel at http://127.0.0.1:2023.

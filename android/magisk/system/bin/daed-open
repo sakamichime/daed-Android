@@ -1,0 +1,9 @@
+#!/system/bin/sh
+
+# Open daed web configuration panel in default browser
+
+am start -a android.intent.action.VIEW -d http://127.0.0.1:2023
+if [ $? -ne 0 ]; then
+    echo "Failed to open daed web panel. Is a browser installed?" >&2
+    exit 1
+fi

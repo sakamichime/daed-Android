@@ -49,6 +49,7 @@
 - ⌨️ **Keyboard First** — Built-in keyboard navigation and shortcuts for power users
 - 📱 **Responsive** — Fully mobile-friendly design
 - 🚀 **Fast** — Built with React and optimized for performance
+- 📱 **Android (Magisk)** — Run as a Magisk module on rooted Android devices with auto-start and a one-tap shortcut to the web panel
 
 ## 🌐 Online Demo
 
@@ -106,6 +107,21 @@ docker compose up -d
 ```
 
 Access the dashboard at `http://localhost:2023`.
+
+## 🤖 Android (Magisk Module)
+
+Run daed on rooted Android devices as a Magisk module with boot auto-start and a one-tap shortcut to the web configuration panel.
+
+**👉 See [android/magisk/README.md](./android/magisk/README.md) for installation and usage instructions.**
+
+Quick start:
+
+1. Download the latest `daed-magisk-<version>.zip` from [GitHub Releases](https://github.com/daeuniverse/daed/releases).
+2. Open the Magisk app → Modules → Install from storage → select the zip.
+3. Reboot your device.
+4. Run `daed-open` in a shell (or use a shortcut generated from `shortcut.json`) to open the dashboard at `http://127.0.0.1:2023`.
+
+> **Note:** Requires a rooted Android device (arm64) with Magisk installed. eBPF support depends on your kernel version (recommended kernel >= 5.10).
 
 ## 💻 Development
 

@@ -1,0 +1,8 @@
+# Android arm64 binary
+daed
+
+# Web frontend assets
+web/
+
+# Final packaged artifact
+*.zip
